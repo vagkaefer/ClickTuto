@@ -50,10 +50,8 @@ export function TutorialList() {
     <div style={styles.page}>
       <header style={styles.header}>
         <div style={styles.logo}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2">
-            <path d="M15 15l-2 5L9 9l11 4-5 2z" />
-          </svg>
-          <span>Click-Tuto</span>
+          <img src={chrome.runtime.getURL('icons/icon.svg')} width="28" height="28" alt="ClickTuto" />
+          <span>ClickTuto</span>
         </div>
         <div style={styles.headerMeta}>
           {tutorials.length} tutorial{tutorials.length !== 1 ? 's' : ''}
