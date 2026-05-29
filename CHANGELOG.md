@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.2] - 2025-05-29
+
+### Fixed
+- Step title/description saves debounced 3s after typing stops — eliminates thumbnail list jitter on every keystroke
+- Inline spinner next to Description label replaces the global "salvando..." badge in sidebar
+- Save flushed immediately on blur so edits are never lost
+
+### Security
+- Runtime validation of message payloads in background service worker (was blindly casting with `as Type`)
+- `javascript:` scheme blocked in HTML and Markdown exports via `safeUrl()`
+- `web_accessible_resources` wildcard `assets/*` removed
+- `frame-ancestors 'none'` CSP added to editor.html to block clickjacking
+- `RecordingOptions` reconstructed from primitives to prevent prototype pollution
+
+### Changed
+- Popup and tutorial list now use the official ClickTuto SVG icon via `chrome.runtime.getURL`
+
 ## [0.9.1] - 2025-05-29
 
 ### Fixed
