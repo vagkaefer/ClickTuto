@@ -8,11 +8,16 @@ import {
 import type { Message, Tutorial, TutorialStep, ClickTarget, RecordingOptions } from '../shared/types'
 
 chrome.runtime.onMessage.addListener((message: Message, _sender, sendResponse) => {
-  handleMessage(message).then(sendResponse).catch(err => {
-    console.error('[click-tuto background] error:', err)
-    sendResponse({ error: String(err) })
-  })
-  return true // keep channel open for async response
+  // Return true synchronously to keep the message channel open while the
+  // async handler runs. Without this the channel closes before sendResponse
+  // is called, which causes the popup to receive undefined.
+  handleMessage(message)
+    .then(result => { try { sendResponse(result) } catch (_) {} })
+    .catch(err => {
+      console.error('[click-tuto background] error:', err)
+      try { sendResponse({ error: String(err) }) } catch (_) {}
+    })
+  return true
 })
 
 async function handleMessage(message: Message): Promise<unknown> {

@@ -19,23 +19,31 @@ function Popup() {
     getAllTutorials().then(setTutorials)
   }, [])
 
+  // MV3 service workers sleep after ~30s of inactivity. Send a no-op ping
+  // first to wake the worker, wait for it to be ready, then send the real message.
+  async function sendMessage(msg: object): Promise<unknown> {
+    // Wake the worker — GET_RECORDING_STATE is idempotent and always safe
+    try { await chrome.runtime.sendMessage({ type: 'GET_RECORDING_STATE' }) } catch (_) {}
+    return chrome.runtime.sendMessage(msg)
+  }
+
   async function handleStart() {
-    const res = await chrome.runtime.sendMessage({ type: 'START_RECORDING' })
+    const res = await sendMessage({ type: 'START_RECORDING' }) as { tutorialId?: string } | undefined
     if (res?.tutorialId) {
-      setState(s => ({ ...s, isRecording: true, currentTutorialId: res.tutorialId, stepCount: 0 }))
+      setState(s => ({ ...s, isRecording: true, currentTutorialId: res.tutorialId!, stepCount: 0 }))
+      window.close()
     }
-    window.close()
   }
 
   async function handleStop() {
-    const res = await chrome.runtime.sendMessage({ type: 'STOP_RECORDING' })
+    const res = await sendMessage({ type: 'STOP_RECORDING' }) as { tutorialId?: string } | undefined
     const tutorialId = res?.tutorialId
-    if (tutorialId) await chrome.runtime.sendMessage({ type: 'OPEN_EDITOR', payload: { tutorialId } })
+    if (tutorialId) await sendMessage({ type: 'OPEN_EDITOR', payload: { tutorialId } })
     window.close()
   }
 
   async function handleOpenEditor(tutorialId: string) {
-    await chrome.runtime.sendMessage({ type: 'OPEN_EDITOR', payload: { tutorialId } })
+    await sendMessage({ type: 'OPEN_EDITOR', payload: { tutorialId } })
     window.close()
   }
 
