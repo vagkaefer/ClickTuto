@@ -58,7 +58,13 @@ async function handleMessage(message: Message): Promise<unknown> {
 
     case 'UPDATE_RECORDING_OPTIONS': {
       const state = await getRecordingState()
-      const options = message.payload as RecordingOptions
+      const raw = message.payload
+      if (!raw || typeof raw !== 'object') return { error: 'Invalid payload' }
+      const p = raw as Record<string, unknown>
+      const options: RecordingOptions = {
+        showHighlight: p.showHighlight === true,
+        showClickDot: p.showClickDot === true,
+      }
       await setRecordingState({ ...state, options })
       await notifyAllTabs({ type: 'UPDATE_RECORDING_OPTIONS', payload: options })
       return { ok: true }
@@ -68,7 +74,16 @@ async function handleMessage(message: Message): Promise<unknown> {
       const state = await getRecordingState()
       if (!state.isRecording || !state.currentTutorialId) return { error: 'Not recording' }
 
-      const payload = message.payload as { target: ClickTarget; url: string; pageTitle: string }
+      const raw = message.payload
+      if (!raw || typeof raw !== 'object') return { error: 'Invalid payload' }
+      const p = raw as Record<string, unknown>
+      if (typeof p.url !== 'string' || typeof p.pageTitle !== 'string' || typeof p.target !== 'object') {
+        return { error: 'Invalid payload' }
+      }
+      const payload = p as { target: ClickTarget; url: string; pageTitle: string }
+      // Sanitize string fields to prevent oversized or malformed data in storage
+      payload.url = String(payload.url).slice(0, 2048)
+      payload.pageTitle = String(payload.pageTitle).slice(0, 256)
       const tabs = await chrome.tabs.query({ active: true, currentWindow: true })
       const tab = tabs[0]
       if (!tab?.id) return { error: 'No active tab' }

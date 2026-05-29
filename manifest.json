@@ -38,7 +38,11 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["editor.html", "assets/*", "chunks/*"],
+      "resources": ["editor.html"],
+      "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["chunks/*"],
       "matches": ["<all_urls>"]
     }
   ]

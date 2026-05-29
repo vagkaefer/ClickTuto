@@ -76,7 +76,7 @@ export function ExportPanel({ tutorial }: Props) {
       lines.push(`## Passo ${i + 1}: ${step.title}`)
       if (step.description) lines.push(`\n${step.description}\n`)
       lines.push(`![${step.title}](images/${imgName})`)
-      if (includeUrl) lines.push(`\n*${step.url}*`)
+      if (includeUrl) lines.push(`\n*${safeUrl(step.url)}*`)
       lines.push('')
     }
 
@@ -102,7 +102,7 @@ export function ExportPanel({ tutorial }: Props) {
         </div>
         ${step.description ? `<p class="step-desc">${escapeHtml(step.description)}</p>` : ''}
         <img src="${dataUrl}" alt="${escapeHtml(step.title)}" class="step-img" />
-        ${includeUrl ? `<div class="step-meta"><a href="${escapeHtml(step.url)}" target="_blank">${escapeHtml(step.url)}</a></div>` : ''}
+        ${includeUrl ? `<div class="step-meta"><a href="${escapeHtml(safeUrl(step.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(step.url)}</a></div>` : ''}
       </div>`)
     }
 
@@ -259,6 +259,15 @@ function slugify(str: string) {
 
 function escapeHtml(str: string) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
+function safeUrl(url: string): string {
+  try {
+    const { protocol } = new URL(url)
+    return protocol === 'http:' || protocol === 'https:' ? url : '#'
+  } catch {
+    return '#'
+  }
 }
 
 function downloadBlob(filename: string, blob: Blob) {
